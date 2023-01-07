@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {v4 as uuidV4} from 'uuid'
+import { v4 as uuidV4 } from "uuid";
 import {
   TextField,
   Typography,
@@ -12,26 +12,32 @@ import {
 } from "@material-ui/core";
 import useStyles from "./styles";
 import { useStateContext } from "../../../context/context";
+import {
+  incomeCategories,
+  expenseCategories,
+} from "../../../constants/categories";
+import formatDate from "../../../utils/formatDate";
 
 const initialState = {
   amount: "",
   category: "",
   type: "Income",
-  date: new Date(),
+  date: formatDate(new Date()),
 };
 const Form = () => {
   const classes = useStyles();
   const [formData, setFormData] = useState(initialState);
-  const {addTransactions} = useStateContext();
-  const transactions = ()=>{
-    const transaction = {
+  const { addTransactions } = useStateContext();
+  const transactions = () => {
+    addTransactions({
       ...formData,
-      amount:Number(formData.amount),
-      id:uuidV4()
-     }
-    addTransactions(transaction);
+      amount: Number(formData.amount),
+      id: uuidV4(),
+    });
     setFormData(initialState);
-  }
+  };
+  const selectCategory =
+    formData.type === "Income" ? incomeCategories : expenseCategories;
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -60,9 +66,13 @@ const Form = () => {
               setFormData({ ...formData, category: e.target.value })
             }
           >
-            <MenuItem value="Business">Business</MenuItem>
-            <MenuItem value="salary">Salary</MenuItem>
-            <MenuItem value="Business">Business</MenuItem>
+            {selectCategory.map((category) => {
+              return (
+                <MenuItem key={category.type} value={category.type}>
+                  {category.type}
+                </MenuItem>
+              );
+            })}
           </Select>
         </FormControl>
       </Grid>
@@ -81,7 +91,9 @@ const Form = () => {
           label="Date"
           fullWidth
           value={formData.date}
-          onChange={(e) => setFormData({ ...formData, date: e.target.value })}          
+          onChange={(e) =>
+            setFormData({ ...formData, date: formatDate(e.target.value) })
+          }
         />
       </Grid>
       <Button

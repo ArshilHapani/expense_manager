@@ -13,11 +13,10 @@ import { Delete, MoneyOff } from "@material-ui/icons";
 import useStyles from "./styles";
 import { useStateContext } from "../../../context/context";
 
-
 const List = () => {
-  const {deleteTransactions,transaction} = useStateContext();  
+  const { deleteTransaction, transaction } = useStateContext();  
   const classes = useStyles();
-   
+
   return (
     <MUIList dense={false} className={classes.list} id="Scrollbar-Design">
       {transaction.map((transactions) => (
@@ -45,7 +44,15 @@ const List = () => {
               secondary={`$${transactions.amount} - ${transactions.date}`}
             />
             <ListItemSecondaryAction>
-              <IconButton edge="end" aria-label="delete" onClick={()=>deleteTransactions(transaction.id)}>
+              <IconButton
+                edge="end"
+                aria-label="delete"
+                onClick={() =>
+                  deleteTransaction(
+                    transactions.id
+                  )
+                }
+              >
                 <Delete />
               </IconButton>
             </ListItemSecondaryAction>
