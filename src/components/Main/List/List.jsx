@@ -14,12 +14,12 @@ import useStyles from "./styles";
 import { useStateContext } from "../../../context/context";
 
 const List = () => {
-  const { deleteTransaction, transaction } = useStateContext();  
+  const { deleteTransaction, transactions } = useStateContext();  
   const classes = useStyles();
 
   return (
     <MUIList dense={false} className={classes.list} id="Scrollbar-Design">
-      {transaction.map((transactions) => (
+      {transactions.map((transactions) => (
         <Slide
           direction="down"
           in
@@ -41,7 +41,7 @@ const List = () => {
             </ListItemAvatar>
             <ListItemText
               primary={transactions.category}
-              secondary={`$${transactions.amount} - ${transactions.date}`}
+              secondary={`₹${transactions.amount} - ${transactions.date}`}
             />
             <ListItemSecondaryAction>
               <IconButton

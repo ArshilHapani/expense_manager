@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { v4 as uuidV4 } from "uuid";
 import {
   TextField,
@@ -17,6 +17,8 @@ import {
   expenseCategories,
 } from "../../../constants/categories";
 import formatDate from "../../../utils/formatDate";
+import { useSpeechContext } from "@speechly/react-client";
+import SnackBar from "../../SnackBar/SnackBar";
 
 const initialState = {
   amount: "",
@@ -26,23 +28,108 @@ const initialState = {
 };
 const Form = () => {
   const classes = useStyles();
+  const { segment } = useSpeechContext();
   const [formData, setFormData] = useState(initialState);
-  const { addTransactions } = useStateContext();
+  const { addTransaction,openDelete,setOpenDelete,setYellowBar,YellowBar } = useStateContext();
+  const [open,setOpen] = useState(false);
   const transactions = () => {
-    addTransactions({
+    if (Number.isNaN(Number(formData.amount)) || !formData.date.includes("-"))
+      return;
+
+      setOpen(true);
+    addTransaction({
       ...formData,
       amount: Number(formData.amount),
       id: uuidV4(),
-    });
+    });    
     setFormData(initialState);
   };
   const selectCategory =
     formData.type === "Income" ? incomeCategories : expenseCategories;
+
+  useEffect(() => {
+    if (segment) {
+      if (segment.intent.intent === "add_expense") {
+        setFormData({
+          ...formData,
+          type: "Expense",
+        });
+      } else if (segment.intent.intent === "add_income") {
+        setFormData({
+          ...formData,
+          type: "Income",
+        });
+      } else if (
+        segment.isFinal &&
+        segment.intent.intent === "create_transaction"
+      ) {
+        return transactions();
+      } else if (
+        segment.isFinal &&
+        segment.intent.intent === "cancel_transaction"
+      ) {
+        return setFormData(initialState);
+      }
+      segment.entities.forEach((e) => {
+        const category = `${e.value.charAt(0)}${e.value.slice(1).toLowerCase}`;
+        switch (e.type) {
+          case "amount":
+            setFormData({
+              ...formData,
+              amount: Number(e.value),
+            });
+            break;
+          case "category":
+            if (incomeCategories.map((ic) => ic.type).includes(category)) {
+              setFormData({
+                ...formData,
+                type: "Income",
+                category: category,
+              });
+            } else if (
+              expenseCategories.map((ic) => ic.type).includes(category)
+            ) {
+              setFormData({
+                ...formData,
+                type: "Expense",
+                category: category,
+              });
+            }
+            break;
+          case "date":
+            setFormData({
+              ...formData,
+              date: e.value,
+            });
+            break;
+
+          default:
+            break;
+        }
+      });
+      if (
+        segment.isFinal &&
+        formData.amount &&
+        formData.category &&
+        formData.type &&
+        formData.date
+      ) {
+        transactions();
+      }
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [segment]);
+
   return (
     <Grid container spacing={2}>
+      <SnackBar open={open} setOpen={setOpen} severity='success' message='Transaction successfully created.'/>
+      <SnackBar open={openDelete} setOpen={setOpenDelete} severity='error' message='Transaction deleted.'/>
+      <SnackBar open={openDelete} setOpen={setOpenDelete} severity='error' message='Transaction deleted.'/>
+      <SnackBar open={YellowBar} setOpen={setYellowBar} severity='info' message='Speech is being recorded.'/>
       <Grid item xs={12}>
         <Typography align="center" variant="subtitle2" gutterBottom>
-          {/* ...Contains word Speech by the user */}...
+          {segment && <>{segment.words.map((w) => w.value).join(" ")}</>}
         </Typography>
       </Grid>
       <Grid item xs={6}>

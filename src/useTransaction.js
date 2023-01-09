@@ -4,8 +4,8 @@ import { useStateContext } from './context/context';
 
 const useTransactions = (title) => {
     resetCategories();
-    const { transaction } = useStateContext();
-    const rightTransactions = transaction.filter((t) => t.type === title);
+    const { transactions } = useStateContext();
+    const rightTransactions = transactions.filter((t) => t.type === title);
     const total = rightTransactions.reduce((acc, currVal) => acc += currVal.amount, 0);
     const categories = title === 'Income' ? incomeCategories : expenseCategories;
 

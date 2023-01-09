@@ -4,6 +4,9 @@ html {
   height: 100%;
   margin: 0;
 }
+*{
+  scroll-behavior: smooth;
+}
 body {
   background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
     url(./assets/money.png);
@@ -21,4 +24,9 @@ body {
   border-bottom-left-radius: 5px;
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
+}
+.mic-btn{
+  position: fixed;
+  bottom: 13px;
+  right: 13px;
 }
